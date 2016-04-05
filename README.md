@@ -60,7 +60,9 @@ John: Hopefully by this point we can clear up any issues that we run across and 
 Here each group member gets a section where they, as an individual, detail what they are responsible for in this project. Each group member writes their own Responsibility section. Include the milestones and final deliverable.
 
 ### Adam Melle @adam-melle
-will write the....
+Will be responsible for creating the tile array and printing to the window.
+Also will be working on randomly generating the map
 
 ### John Perkins @raghnall6402
-will work on...
+Will be responsible for creating the hash table for the graphics.
+Also will be working on randomly generating the map.
