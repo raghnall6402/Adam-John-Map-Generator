@@ -3,28 +3,27 @@
 ### Statement
 Adam: Our project is a random game map generator. It will generate 2D game maps using various square tiles holding different graphics. Each graphic will be attached to rules that will determine the nature of how it can be randomly generated. For example, some tiles may only be able to appear a certain number of times, or some may not be able to be placed adjacent to each other. Our project is interesting because, depending on the complexity of our tile placement rules and the number of graphics we have, we can generate a large number of unique maps that appear to be designed by a human, but are actually generated randomly.
 
-John:
+John: As Adam stated, our project is a random map generated with a more focus on a maze or dungeon-like design. We hope to include different tile types that would have different terrains such as Water, Pits, Walls, and Normal Floors which would have it's own variables such as passable or not. The idea is that after this random dungeon is created, it could be used as a 2d grid for a game in the future. This project is interesting to me as I’ve implemented somewhat similar ideas in other languages such as C++, but never in full. It will also be a good experience for me as I’ve not done any projects myself that involve directly collaborating with team members such as this one.
 
 ### Analysis
 Adam: Our plan is to implement the design using a hash table and an array. The hash table will hold the textures and their placement rules, and the array will be used to represent the grid that the tiles will be placed on. We plan to use the picturing-programs library to manipulate the graphics and possibly the gui library for creating a window and random generating options. Recursion will be used for randomly generating the maps and for printing the contents of the array to a window. Filter may be used for finding graphics that are eligable for placement on a certain tile. There is also a strong possibility that me might use object-orientation for each graphic. By doing this we can give each graphic its own properties that will be useful when determining how to place them.
 
-John:
+John: Adam wrote the basis as far as what we’ve concluded to use in our project with the use of hash tables and arrays. I think the only case where we’ll need state modification might be with the randomization options to create these maps unless it is implemented when the base procedure is called. As far as data abstraction goes we’d obviously be using hash tables to represent our different versions of times which would have their own variables such as “passable terrain” so that there will always be at least one path to the end.
 
 ### Data set or other source materials
 Adam: We may decide to use graphics found on free use graphics websites for our tiles. The graphics will be resized and edited if needed.
 
-John:
+John: Source materials would be graphics from a site or some simple ones created from some image editing program.
 
 ### Deliverable and Demonstration
 Adam: In the end we will have a program capable of generating valid random tile maps using various graphics. The program will display a window containing a randomize button and randomization options. It will also have an area to display the generated map.
 
-John:
-
+John: As far as the live demo is involved, we should be able to demonstrate this random map generator by showing off the different types of tiles included at the base level, and the ability to create new types on the fly by inserting one into the hash table and re-running it. Another aspect at the live demo would be demonstrating some of the randomization options such as the ability to change the size, in tiles, of the map that is produced. The hope is that at the end of the project, we would have made a successful random map generator that could be used for a game in the future. To show that the project is working we would interact with the randomization options and add different terrain types to it on the fly.
 
 ### Evaluation of Results
 Adam: We will know that we were successful if we can randomly generate valid maps. Meaning that the path intended to be taken by a player is not obstructed by walls, water, or any tile that is considered to be an obstruction. If the end of a map is unreachable, we'll know that our tile placement algorithms aren't working properly.
 
-John:
+John: It will be successful in my mind if in addition to a path from the start to the end as mentioned by Adam, there is the ability to insert different terrain types and possibly filter which we want active for a given map. If it does not have these type of randomization options then I our interface and implementation didn’t work correctly. Also if we have rooms or paths which don’t connect to the start themselves, then our algorithms are working incorrectly.
 
 ## Architecture Diagram
 Upload the architecture diagram you made for your slide presentation to your repository, and include it in-line here.
@@ -45,34 +44,23 @@ Write concrete steps for your schedule to move from concept to working system.
 ### First Milestone (Fri Apr 15)
 Adam: By the first milestone we want to have a working manual map generator. The graphics will have to be placed in the array by the user, but the map should be able to be displayed in a window by this point. We also plan to have a fair number of different graphics available for use.
 
-John:
+John: First Milestone should include a basic test map that displays our different types of tiles and the first pass of randomization of maps. More importantly at this point I think is the implementation and display of different tile graphics.
 
 ### Second Milestone (Fri Apr 22)
 Adam: By the second milestone we'd like to have a random generate button that is capable of generating random maps, that for the most part, are obstruction free. We may still need to refine our placement algorithms to guarentee a valid map. This will the most challenging part of the project and will take a lot of testing to perfect.
 
-John:
+John: Second Milestone should more inplace to guarantee valid maps and more rules for our tiles themselves, as well as a button or command to generate a new map on the fly.
 
 ### Final Presentation (last week of semester)
 Adam: Assuming that we don't run into any unforseen problems, we'd like to use this time to perfect the tile placement rules and algorithms so that a valid random map is generated each time. We may also add in more graphics for the tiles.
 
-John:
+John: Hopefully by this point we can clear up any issues that we run across and implement various UI elements such as more options for  map generation like choosing which implemented terrain types to be used and the size of the maps, as well as the ability to  print/save(?) the map.
 
 ## Group Responsibilities
 Here each group member gets a section where they, as an individual, detail what they are responsible for in this project. Each group member writes their own Responsibility section. Include the milestones and final deliverable.
-
-**Additional instructions for teams of three:** 
-* Remember that you must have prior written permission to work in groups of three (specifically, an approved `FP3` team declaration submission).
-* The team must nominate a lead. This person is primarily responsible for code integration. This work may be shared, but the team lead has default responsibility.
-* The team lead has full partner implementation responsibilities also.
-* Identify who is team lead.
-
-In the headings below, replace the silly names and GitHub handles with your actual ones.
 
 ### Adam Melle @adam-melle
 will write the....
 
 ### John Perkins @raghnall6402
 will work on...
-
-### Frank Functions @frankiefunk 
-Frank is team lead. Additionally, Frank will work on...   
