@@ -28,16 +28,9 @@ John: It will be successful in my mind if in addition to a path from the start t
 ## Architecture Diagram
 ![](https://raw.githubusercontent.com/oplS16projects/Adam-John-Map-Generator/master/Diagram.png)
 
+The hash table will be used to store the graphics and their properties. The hash table will be accessed by a randomization procedure that will output into the grid array. The randomize procedure will use the properties stored in the hash table for each graphic to determine where a tile is able to be placed. From there, the array will be processed by the picturing programs library and displayed in a window. The window will contain a randomize button as well as randomization options. We plan to created these buttons and input fields using racket/gui.
+
 ## Schedule
-Explain how you will go from proposal to finished product. 
-
-There are three deliverable milestones to explicitly define, below.
-
-The nature of deliverables depend on your project, but may include things like processed data ready for import, core algorithms implemented, interface design prototyped, etc. 
-
-You will be expected to turn in code, documentation, and data (as appropriate) at each of these stages.
-
-Write concrete steps for your schedule to move from concept to working system. 
 
 ### First Milestone (Fri Apr 15)
 Adam: By the first milestone we want to have a working manual map generator. The graphics will have to be placed in the array by the user, but the map should be able to be displayed in a window by this point. We also plan to have a fair number of different graphics available for use.
@@ -55,12 +48,11 @@ Adam: Assuming that we don't run into any unforseen problems, we'd like to use t
 John: Hopefully by this point we can clear up any issues that we run across and implement various UI elements such as more options for  map generation like choosing which implemented terrain types to be used and the size of the maps, as well as the ability to  print/save(?) the map.
 
 ## Group Responsibilities
-Here each group member gets a section where they, as an individual, detail what they are responsible for in this project. Each group member writes their own Responsibility section. Include the milestones and final deliverable.
 
 ### Adam Melle @adam-melle
-Will be responsible for creating the tile array and printing to the window.
-Also will be working on randomly generating the map
+First Milestone: Will be responsible for creating the tile array and printing to the window.
+Second Milestone: We will both be working on randomly generating the map.
 
 ### John Perkins @raghnall6402
-Will be responsible for creating the hash table for the graphics.
-Also will be working on randomly generating the map.
+First Milestone: Will be responsible for creating the hash table for the graphics.
+Second Milestone: We will both be working on randomly generating the map.
