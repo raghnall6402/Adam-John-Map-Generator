@@ -26,9 +26,7 @@ Adam: We will know that we were successful if we can randomly generate valid map
 John: It will be successful in my mind if in addition to a path from the start to the end as mentioned by Adam, there is the ability to insert different terrain types and possibly filter which we want active for a given map. If it does not have these type of randomization options then I our interface and implementation didn’t work correctly. Also if we have rooms or paths which don’t connect to the start themselves, then our algorithms are working incorrectly.
 
 ## Architecture Diagram
-Upload the architecture diagram you made for your slide presentation to your repository, and include it in-line here.
-
-Create several paragraphs of narrative to explain the pieces and how they interoperate.
+![](https://raw.githubusercontent.com/oplS16projects/Adam-John-Map-Generator/master/Diagram.png)
 
 ## Schedule
 Explain how you will go from proposal to finished product. 
