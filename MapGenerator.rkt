@@ -60,14 +60,14 @@
         (begin
               (vector-set! ArrIndex 1 0)
               (vector-set! ArrIndex 0 0))
-        ;;Increment vector position 1 if position 0 is equal to 9
-        (if (equal? (vector-ref ArrIndex 0) 9)
+        ;;Increment vector position 0 if position 1 is equal to 9
+        (if (equal? (vector-ref ArrIndex 1) 9)
             (begin
-              (vector-set! ArrIndex 1 (+ (vector-ref ArrIndex 1) 1))
-              (vector-set! ArrIndex 0 0))
-            ;;Else, increment vector position 0
+              (vector-set! ArrIndex 0 (+ (vector-ref ArrIndex 0) 1))
+              (vector-set! ArrIndex 1 0))
+            ;;Else, increment vector position 1
             (begin
-              (vector-set! ArrIndex 0 (+ (vector-ref ArrIndex 0) 1))))))
+              (vector-set! ArrIndex 1 (+ (vector-ref ArrIndex 1) 1))))))
 
 ;; Iterates through the arrayMap, calls printmap, and increments xpos/ypos by 40px(size of tiles)
 (define (GenerateMap)
