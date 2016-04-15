@@ -29,24 +29,48 @@
              [label "Generate"]
              ;;Button click calls GenerateMap
              [callback (lambda (button event)
-                         (GenerateMap))])
+                         (begin
+                           (Reset)
+                           (randomizeArray)
+                           (GenerateMap)))])
+
+;;Water check-box
+(define watercheck
+  (new check-box% [parent mainWin]
+                  [label "Water(does nothing)"]
+                  [callback (lambda (check-box event)
+                            (if(equal?(send watercheck get-value) #t)
+                               (display "Generate Water \n")
+                               (display "Don't Generate Water \n")))]))
+
+;;Lava check-box
+(define lavacheck
+  (new check-box% [parent mainWin]
+                  [label "Lava(does nothing)"]
+                  [callback (lambda (check-box event)
+                            (if(equal?(send lavacheck get-value) #t)
+                               (display "Generate Lava \n")
+                               (display "Don't Generate Lava \n")))]))
 
 ;;Procedure for displaying the tiles
 (define (printmap theTile xpos ypos)
     (send (send theMap get-dc) draw-bitmap theTile xpos ypos))
 
 ;;10x10 array for tiles(may be a dynamic array in the future)
-(define arrayMap
-    (array #[#[grass water water water grass grass grass grass grass grass]
-             #[grass water water water path  path  path  grass grass grass]
-             #[grass water water water path  grass path  grass grass grass]
-             #[grass grass grass grass path  grass path  path  grass grass]
-             #[grass grass grass path  path  grass grass path  grass grass]
-             #[grass grass grass path  grass grass grass path  grass grass]
-             #[grass grass grass path  grass grass grass path  grass grass]
-             #[path  path  path  path  grass grass grass path  path  path]
-             #[grass grass grass grass grass grass grass grass grass grass]
-             #[grass grass grass grass grass grass grass grass grass grass]]))
+(define arrayMap null)
+
+(define (Reset)
+    (set! arrayMap
+       (mutable-array #[ #[grass grass grass grass grass grass grass grass grass grass]
+                         #[grass grass grass grass grass grass grass grass grass grass]
+                         #[grass grass grass grass grass grass grass grass grass grass]
+                         #[grass grass grass grass grass grass grass grass grass grass]
+                         #[grass grass grass grass grass grass grass grass grass grass]
+                         #[grass grass grass grass grass grass grass grass grass grass]
+                         #[grass grass grass grass grass grass grass grass grass grass]
+                         #[grass grass grass grass grass grass grass grass grass grass]
+                         #[grass grass grass grass grass grass grass grass grass grass]
+                         #[grass grass grass grass grass grass grass grass grass grass] ])))
 
 ;;Vector for array
 (define ArrIndex
@@ -83,5 +107,48 @@
               ;;Else, increment xpos by 40
               (GenerateMapiter (+ xpos 40) ypos)))))
   (GenerateMapiter 0 0))
+
+;; Randomly fill array
+(define (randomizeArray)
+  (begin
+    (define x (random 10))
+    (array-set! arrayMap (vector x 0) path)
+    (genPath (vector x 0))))
+
+;;Generate path
+(define (genPath pathVector)
+  (begin
+    ;;Used for next step
+    (define nextx 0)
+    (define nexty 0)
+    ;;Determine next position and change pathVector value
+    (define (chooseNext)
+      (begin
+        (set! nextx (- (random 3) 1))
+        (if(equal? nextx 0)
+           (set! nexty 1)(set! nexty 0))
+        ;;If the new postition is in bounds. Else, choose again.
+        (if(and(> (+ nextx (vector-ref pathVector 0)) -1)
+               (<(+ nextx (vector-ref pathVector 0)) 10))
+           ;;Check that the new position is empty(contains grass)
+           (if(eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0))
+                                              (+ nexty (vector-ref pathVector 1)))) grass)
+              ;;If empty, set pathVector to the new values.
+              (begin
+                  (vector-set! pathVector 0 (+ nextx (vector-ref pathVector 0)))
+                  (vector-set! pathVector 1 (+ nexty (vector-ref pathVector 1))))
+           ;;If not empty, choose again.
+           (chooseNext))
+            (chooseNext))))
+    ;;Place the new tile in the arrayMap
+    (define (placeTile)
+      (array-set! arrayMap pathVector path))
+   ;;Driver
+    (if(not(equal? (vector-ref pathVector 1) 9))
+       (begin
+         (chooseNext)
+         (placeTile)
+         (genPath pathVector))
+       (display "Generate path done\n"))))
 
 (send mainWin show #t)
