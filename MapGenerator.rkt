@@ -2,11 +2,46 @@
 (require 2htdp/image)
 (require math/array)
 
-;;Bitmap objects that will eventually be in a hash table
-(define initialize (make-object bitmap% "blank.bmp"))
-(define path (make-object bitmap% "path.png"))
-(define water (make-object bitmap% "water.png"))
-(define grass (make-object bitmap% "grass.png"))
+
+;;Hashtable for different terrain types
+(define (makeTable)
+  (let ((table (make-hash)))
+    (define (lookup key)
+      (hash-ref table key))
+    (define (insert! key value)
+      (hash-set! table key value))
+  (define (dispatch m)
+    (cond ((eq? m 'lookup) lookup)
+          ((eq? m 'insert!) insert!)
+          (else (error "Unknown format -- TABLE" m))))
+  dispatch))
+
+;;Basic Definitions
+(define terrainTable (makeTable))
+(define putTerrain (terrainTable 'insert!))
+(define getTerrain (terrainTable 'lookup))
+
+;;Data Structure Basis
+(define (makeTerrain passable texture)
+  (cons passable texture))
+(define (getPassable terrain)
+  (car (getTerrain terrain)))
+(define (getTexture terrain)
+  (cdr (getTerrain terrain)))
+
+;;Basic objects
+(putTerrain 'default
+            (makeTerrain #f (make-object bitmap% "blank.bmp")))
+(putTerrain 'grass
+            (makeTerrain #t (make-object bitmap% "grass.png")))
+(putTerrain 'path
+            (makeTerrain #t (make-object bitmap%  "path.png")))
+(putTerrain 'water
+            (makeTerrain #f (make-object bitmap% "water.png")))
+(putTerrain 'ice
+            (makeTerrain #t (make-object bitmap% "ice.png")))
+(putTerrain 'lava
+            (makeTerrain #f (make-object bitmap% "lava.png")))
 
 ;;The main window (mainWin)
 (define mainWin (instantiate frame%("Map Generator")))
@@ -16,7 +51,7 @@
   (class canvas%
     (override on-paint)
     (define on-paint
-      (lambda()(send (send theMap get-dc) draw-bitmap initialize 0 0)))
+      (lambda()(send (send theMap get-dc) draw-bitmap (getTexture 'default) 0 0)))
     (super-instantiate())))
 
 ;;Create a 400x400px canvas(theMap) inside mainWin
@@ -61,16 +96,16 @@
 
 (define (Reset)
     (set! arrayMap
-       (mutable-array #[ #[grass grass grass grass grass grass grass grass grass grass]
-                         #[grass grass grass grass grass grass grass grass grass grass]
-                         #[grass grass grass grass grass grass grass grass grass grass]
-                         #[grass grass grass grass grass grass grass grass grass grass]
-                         #[grass grass grass grass grass grass grass grass grass grass]
-                         #[grass grass grass grass grass grass grass grass grass grass]
-                         #[grass grass grass grass grass grass grass grass grass grass]
-                         #[grass grass grass grass grass grass grass grass grass grass]
-                         #[grass grass grass grass grass grass grass grass grass grass]
-                         #[grass grass grass grass grass grass grass grass grass grass] ])))
+       (mutable-array #[ #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
+                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
+                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
+                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
+                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
+                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
+                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
+                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
+                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
+                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)] ])))
 
 ;;Vector for array
 (define ArrIndex
@@ -112,7 +147,7 @@
 (define (randomizeArray)
   (begin
     (define x (random 10))
-    (array-set! arrayMap (vector x 0) path)
+    (array-set! arrayMap (vector x 0) (getTexture 'path))
     (genPath (vector x 0))))
 
 ;;Generate path
@@ -132,7 +167,7 @@
                (<(+ nextx (vector-ref pathVector 0)) 10))
            ;;Check that the new position is empty(contains grass)
            (if(eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0))
-                                              (+ nexty (vector-ref pathVector 1)))) grass)
+                                              (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass))
               ;;If empty, set pathVector to the new values.
               (begin
                   (vector-set! pathVector 0 (+ nextx (vector-ref pathVector 0)))
@@ -142,7 +177,7 @@
             (chooseNext))))
     ;;Place the new tile in the arrayMap
     (define (placeTile)
-      (array-set! arrayMap pathVector path))
+      (array-set! arrayMap pathVector (getTexture 'path)))
    ;;Driver
     (if(not(equal? (vector-ref pathVector 1) 9))
        (begin
