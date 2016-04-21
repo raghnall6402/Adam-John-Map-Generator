@@ -68,23 +68,21 @@
                            (randomizeArray)
                            (DisplayMap)))])
 
-;;Water check-box
-(define watercheck
-  (new check-box% [parent mainWin]
-                  [label "Water(does nothing)"]
-                  [callback (lambda (check-box event)
-                            (if(equal?(send watercheck get-value) #t)
-                               (display "Generate Water \n")
-                               (display "Don't Generate Water \n")))]))
+;;Water intensity slider
+(define waterIntensity
+  (new slider% (label "Water intensity")
+               (parent mainWin)
+               (min-value 0)
+               (max-value 100)
+               (init-value 50)))
 
-;;Lava check-box
-(define lavacheck
-  (new check-box% [parent mainWin]
-                  [label "Lava(does nothing)"]
-                  [callback (lambda (check-box event)
-                            (if(equal?(send lavacheck get-value) #t)
-                               (display "Generate Lava \n")
-                               (display "Don't Generate Lava \n")))]))
+;;Lava intensity slider
+(define lavaIntensity
+  (new slider% (label "Lava intensity  ")
+               (parent mainWin)
+               (min-value 0)
+               (max-value 100)
+               (init-value 50)))
 
 ;;Procedure for printing
 (define (printmap theTile xpos ypos)
@@ -167,11 +165,13 @@
 ;; RANDOMIZE THE ARRAY MAP - Calls all the randomization procedures ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (randomizeArray)
+  (begin
     ;;GENERATE THE RANDOM PATH
     (genPath)
-    ;;GENERATE WATER/LAVA
+    ;;GENERATE WATER
+    (genLiquid)
     ;;GENERATE OTHER THINGS
-)
+))
 ;;;;;;;;;;;;;;;;;;;;;
 ;;END RANDOMIZE MAP;;
 ;;;;;;;;;;;;;;;;;;;;;
@@ -224,51 +224,114 @@
 ;;END GENERATE PATH;;
 ;;;;;;;;;;;;;;;;;;;;;
 
-;;still in progress
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;GENERATE LIQUID ALGORITHM: FOR 'liquid TAGGED TILES;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (genLiquid waterVector)
+(define (genLiquid)
     (begin
-      (define limit 10)
-      ;Used for next step
-      (define nextx 0)
-      (define nexty 0)
-      ;Pick a random next spot next to the previous
-      (define (chooseNext)
-        (set! nextx (- (random 3) 1))
-        (set! nexty (random 1))
-        (if (and (equal? nextx 0) (equal? nexty 0))
-            (set! nexty -1)
-            (if (and (equal? nextx 0) (equal? nexty 1))
-                (set! nexty -1) null))
-        ;Check if the new postition is in bounds. Else, choose again.
-        (if(and(> (+ nextx (vector-ref waterVector 0)) -1)
-               (< (+ nextx (vector-ref waterVector 0)) 20)
-               (> (+ nexty (vector-ref waterVector 1)) -1)
-               (< (+ nexty (vector-ref waterVector 1)) 20))
-           ;Check that the new position is empty(contains grass)
-           (if(eq?(array-ref arrayMap (vector (+ nextx (vector-ref waterVector 0))
-                                              (+ nexty (vector-ref waterVector 1)))) (getTexture 'grass))
-              ;If empty, set pathVector to the new values.
+      ;;Define variables
+      (define waterVector (vector 0 0)) ;Keeps track of current position in the map array
+      (define waterLimit ;Number of water tiles to spawn
+        (if (< (send waterIntensity get-value) 15)
+            15 (send waterIntensity get-value)))
+      (define nextx 0) ;Used for next step
+      (define nexty 0) ;Used for next step
+      (define tilechance 3) ;2/3 chance
+      (define turnchance 0) ;0% chance to turn initially
+      (define direction 0) ;0-right 1-down 2-left 3-up
+      ;;;;;;;;;;;;;;;;;;;;;;
+      ;;Random start point;;
+      ;;;;;;;;;;;;;;;;;;;;;;
+      (define (startRandom)
+        (begin
+          (set! nextx (random 20))
+          (set! nexty (random 20))
+          (if (inBounds?)
+            (if (tileEmpty?)
               (begin
-                (vector-set! waterVector 0 (+ nextx (vector-ref waterVector 0)))
-                (vector-set! waterVector 1 (+ nexty (vector-ref waterVector 1))))
-              ;If not empty, choose again.
-              (chooseNext))
-           (chooseNext)))
-    ;Place the new tile in the arrayMap
-    (define (placeTile)
-      (begin
-        (array-set! arrayMap waterVector (getTexture 'water))
-        (set! limit (- limit 1))))
-    ;Driver
-    (if(> limit 0)
-       (begin
-         (chooseNext)
-         (placeTile)
-         (genLiquid waterVector))
-       (display "Generate water done\n"))))
+                (placeTile)
+                (Turn))
+              (startRandom))
+              (startRandom))))
+      ;;;;;;;;;;;;;;;;;;;;;
+      ;;Changes direction;;
+      ;;;;;;;;;;;;;;;;;;;;;
+      (define (Turn)
+        (begin
+          (set! turnchance (+ turnchance 28))
+          (if(< (random 100) turnchance)
+             (begin
+               (set! turnchance 0)
+               (if (equal? direction 3)
+                   (set! direction 0)
+                   (set! direction (+ direction 1))))
+             null)))
+      ;;;;;;;;;;;;;;
+      ;;Force turn;;
+      ;;;;;;;;;;;;;;
+      (define (forceTurn)
+        (begin
+          (set! waterLimit (- waterLimit 1))
+          (set! turnchance 0)
+          (if (equal? direction 3)
+            (set! direction 0)
+            (set! direction (+ direction 1)))))
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;Checks if position is in bounds;;
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      (define (inBounds?)
+        (if (and (> (+ nextx (vector-ref waterVector 0)) -1)
+                 (< (+ nextx (vector-ref waterVector 0)) 20)
+                 (> (+ nexty (vector-ref waterVector 1)) -1)
+                 (< (+ nexty (vector-ref waterVector 1)) 20))#t #f))
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;Checks if position is empty;;
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      (define (tileEmpty?)
+        (if(eq?(array-ref arrayMap (vector (+ nextx (vector-ref waterVector 0))
+                                           (+ nexty (vector-ref waterVector 1))))
+               (getTexture 'grass))#t #f))
+      ;;;;;;;;;;;;;;
+      ;;Place tile;;
+      ;;;;;;;;;;;;;;
+      (define (placeTile)
+        (begin
+          (set! waterLimit (- waterLimit 1))
+          (vector-set! waterVector 0 (+ nextx (vector-ref waterVector 0)))
+          (vector-set! waterVector 1 (+ nexty (vector-ref waterVector 1)))
+          ;;(if (< (random 100) 75)
+            (array-set! arrayMap waterVector (getTexture 'water))
+           ; (display "Didn't place water"))))
+            ))
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;Take a step in a direction;;
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      (define (Step)
+        (begin
+          (cond
+            [(equal? direction 0)(begin (set! nextx 0)(set! nexty 1))] ;move right
+            [(equal? direction 1)(begin (set! nextx 1)(set! nexty 0))] ;move down
+            [(equal? direction 2)(begin (set! nextx 0)(set! nexty -1))] ;move left
+            [(equal? direction 3)(begin (set! nextx -1)(set! nexty 0))]) ;move up
+          (if (inBounds?)
+            (if (tileEmpty?)
+              (begin
+                (placeTile)
+                (Turn))
+              (forceTurn))
+              (forceTurn))
+          (if (> waterLimit 0)
+            (Step)
+            (display "Generate Water Done \n"))))
+      ;;;;;;;;;;;;;;
+      ;;  DRIVER  ;;
+      ;;;;;;;;;;;;;;
+      (if (> (send waterIntensity get-value) 0)
+        (begin
+          (startRandom)
+          (Step))null)
+      (if(< (random 115) (send waterIntensity get-value))
+         (genLiquid)null)))
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;END GENERATE LIQUID;;
 ;;;;;;;;;;;;;;;;;;;;;;;
