@@ -1,5 +1,7 @@
 # Project Title: Random Game Map Generator
 
+Adam Update: The map generator now has the ability to generate random pools of water. I have also implemented a slider that can be used to choose the insensity of the water. The slider basically just increases/decreases the chance that a water pool will be spawned, and how big the pool will be. The same option will be available for lava once it's implemented, as well as for other tiles that can be selected for use. Nothing special has to be done to run the code. The images just need to be in the same directory as the racket file.
+
 Adam Update: As of right now, for the first milestone, the map generator is able to generate maps manually as well as generate basic maps with random paths. The path-making algorithm has been working 100% of the time. The next thing to do is to implement the hash table and generation algorithms for different tile types.
 
 ### Statement
