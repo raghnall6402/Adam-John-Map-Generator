@@ -181,7 +181,7 @@
 (define (randomizeArray)
   (begin
     ;;GENERATE THE RANDOM PATH
-    (genPath)
+    (genPath (send pathComplexity get-value) #f)
     ;;GENERATE WATER
     (genLiquid 'water (send waterIntensity get-value))
     ;;GENERATE LAVA
@@ -195,12 +195,26 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;GENERATE PATH ALGORITHM: FOR 'path TAGGED TILES;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (genPath)
+(define (genPath complexity subpath)
   (begin
     ;;Define variables
     (define pathVector (vector 0 0)) ;Keeps track of current position in the map array
     (define nextx 0) ;Used to hold next step x value
     (define nexty 0) ;Used to hold next step y value
+    (define sublength 100)
+    (define attempts 200)
+    ;;;;;;;;;;;;;;;;;;;;;;
+    ;;Branch from path  ;;
+    ;;;;;;;;;;;;;;;;;;;;;;
+    (define (branchRandom)
+      (if(> attempts 0)
+         (begin
+           (set! attempts (- attempts 1))
+           (vector-set! pathVector 0 (random 20))
+           (vector-set! pathVector 1 (random 20))
+           (if(eq?(array-ref arrayMap (vector (vector-ref pathVector 0) ;Checks if random point is a path tile
+                                      (vector-ref pathVector 1))) (getTexture 'path))
+              (chooseNext)(branchRandom)))(display "Used every attempt")))
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;; RANDOM WALK PROCEDURE - Randomly chooses a direction by setting nextx to a  ;;
     ;;                         random number from -1 to 1. -1=Down 0=Right 1=Up.   ;;
@@ -208,40 +222,60 @@
     ;;                         Otherwise nexty is set to 0 to move up or down.     ;;
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     (define (chooseNext)
-      (begin
-        (set! nextx (- (random 3) 1)) ;Random number from -1 to 1.
-        (if(equal? nextx 0) ;If next==0 set nexty to 1, else set nexty to 0.
-           (set! nexty 1)(set! nexty 0))
-          (if(and(> (+ nextx (vector-ref pathVector 0)) -1) ;Checks if the next step is in bounds
-               (<(+ nextx (vector-ref pathVector 0)) 20))
-            (if(or(eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
-                                                  (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass1))
-                  (eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
-                                                  (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass2))
-                  (eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
-                                                  (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass3))
-                  (eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
-                                                  (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass4)))
-              (begin ;If the next step is terrain, Update the current vector position. Set that position in the map array
-                     ;to the new path tile. Recrusively call this procedure again if the current position isn't against the right wall. 
-                  (vector-set! pathVector 0 (+ nextx (vector-ref pathVector 0)))
-                  (vector-set! pathVector 1 (+ nexty (vector-ref pathVector 1)))
-                  (array-set! arrayMap pathVector (getTexture 'path))
-                  (if(not(equal? (vector-ref pathVector 1) 19))
-                     (chooseNext)(display "Generate path done\n")))
-           ;If not empty or out of bounds, choose again by recursively calling this procedure.
-           (chooseNext))
-            (chooseNext))))
+      (if(or(and(equal? subpath #t)(> sublength 0))(equal? subpath #f))
+        (begin
+          (set! sublength (- sublength 1))
+          (set! nextx (- (random 3) 1)) ;Random number from -1 to 1.
+          (if(equal? nextx 0) ;If next==0 set nexty to 1, else set nexty to 0.
+             (set! nexty 1)(set! nexty 0))
+            (if(and(> (+ nextx (vector-ref pathVector 0)) -1) ;Checks if the next step is in bounds
+                   (< (+ nextx (vector-ref pathVector 0)) 20)
+                   (> (+ nexty (vector-ref pathVector 1)) -1)
+                   (< (+ nexty (vector-ref pathVector 1)) 20))
+              (if(or(eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
+                                                    (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass1))
+                    (eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
+                                                    (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass2))
+                    (eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
+                                                    (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass3))
+                    (eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
+                                                    (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass4))
+                    (and(eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is a path(this option is for subpaths)
+                                                        (+ nexty (vector-ref pathVector 1)))) (getTexture 'path))
+                      (equal? subpath #t))) 
+                (begin ;If the next step is terrain, Update the current vector position. Set that position in the map array
+                       ;to the new path tile. Recrusively call this procedure again if the current position isn't against the right wall. 
+                    (vector-set! pathVector 0 (+ nextx (vector-ref pathVector 0)))
+                    (vector-set! pathVector 1 (+ nexty (vector-ref pathVector 1)))
+                    (array-set! arrayMap pathVector (getTexture 'path))
+
+                    (if(and(not(equal? (vector-ref pathVector 1) 19)))
+                      (chooseNext)
+                      (display "Generate path done\n")))
+             ;If not empty or out of bounds, choose again by recursively calling this procedure.
+             (chooseNext))
+              (chooseNext)))null))
     ;;;;;;;;;;;;;;
     ;;  DRIVER  ;;
     ;;;;;;;;;;;;;;
+    ;;If the call to this procedure is meant to generate a subpath
+    (if(and (< (random 120) complexity) (equal? subpath #t))
+      (begin
+        (branchRandom)
+        (genPath complexity #t))null)
     ;Picks a random point on the left edge of the map and places the first path tile.
-    (vector-set! pathVector 0 (random 20))
-    (vector-set! pathVector 1 0)
-    (array-set! arrayMap pathVector (getTexture 'path))
-    ;Generate the rest of the path. chooseNext will recursively call
-    ;itself until it reaches the right edge of the map.
-    (chooseNext)))
+    (if(equal? subpath #f)
+      (begin
+        (vector-set! pathVector 0 (random 20))
+        (vector-set! pathVector 1 0)
+        (array-set! arrayMap pathVector (getTexture 'path))
+        ;Generate the rest of the path. chooseNext will recursively call
+        ;itself until it reaches the right edge of the map.
+        (chooseNext))null)
+    ;;If the complexity is > 0 and branch is #f, set branch to #t and recrusively call genpath
+    (if(and(> complexity 0)(equal? subpath #f))
+       (genPath complexity #t)(display "no subpaths"))))
+
 ;;;;;;;;;;;;;;;;;;;;;
 ;;END GENERATE PATH;;
 ;;;;;;;;;;;;;;;;;;;;;
@@ -261,20 +295,23 @@
       (define tilechance 3) ;2/3 chance
       (define turnchance 0) ;0% chance to turn initially
       (define direction 0) ;0-right 1-down 2-left 3-up
+      (define attempts 15) ;number of times random start can try to find a random point. prevents endless loop if the map is full.
       ;;;;;;;;;;;;;;;;;;;;;;
       ;;Random start point;;
       ;;;;;;;;;;;;;;;;;;;;;;
       (define (startRandom)
-        (begin
-          (set! nextx (random 20))
-          (set! nexty (random 20))
-          (if (inBounds?)
-            (if (tileEmpty?)
-              (begin
-                (placeTile)
-                (Turn))
-              (startRandom))
-              (startRandom))))
+        (if (> attempts 0)
+            (begin
+              (set! attempts (- attempts 1))
+              (set! nextx (random 20))
+              (set! nexty (random 20))
+              (if (inBounds?)
+                  (if (tileEmpty?)
+                      (begin
+                        (placeTile)
+                        (Turn))
+                      (startRandom))
+                  (startRandom)))(display "Ran out of attempts")))
       ;;;;;;;;;;;;;;;;;;;;;
       ;;Changes direction;;
       ;;;;;;;;;;;;;;;;;;;;;
