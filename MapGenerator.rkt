@@ -31,8 +31,14 @@
 ;;Basic objects
 (putTerrain 'default
             (makeTerrain #f (make-object bitmap% "blank.bmp")))
-(putTerrain 'grass
-            (makeTerrain #t (make-object bitmap% "grass.png")))
+(putTerrain 'grass1
+            (makeTerrain #t (make-object bitmap% "grass1.png")))
+(putTerrain 'grass2
+            (makeTerrain #t (make-object bitmap% "grass2.png")))
+(putTerrain 'grass3
+            (makeTerrain #t (make-object bitmap% "grass3.png")))
+(putTerrain 'grass4
+            (makeTerrain #t (make-object bitmap% "grass4.png")))
 (putTerrain 'path
             (makeTerrain #t (make-object bitmap% "path.png")))
 (putTerrain 'water
@@ -58,15 +64,13 @@
                   (min-width 800)
                   (min-height 800)))
 
-;;Generate Button
-(new button% [parent mainWin]
-             [label "Generate"]
-             ;;Button click resets the map, randomizes it, then displays it.
-             [callback (lambda (button event)
-                         (begin
-                           (Reset)
-                           (randomizeArray)
-                           (DisplayMap)))])
+;;Path complexity slider
+(define pathComplexity
+  (new slider% (label "Path complexity")
+               (parent mainWin)
+               (min-value 0)
+               (max-value 100)
+               (init-value 50)))
 
 ;;Water intensity slider
 (define waterIntensity
@@ -84,6 +88,16 @@
                (max-value 100)
                (init-value 50)))
 
+;;Generate Button
+(new button% [parent mainWin]
+             [label "Generate"]
+             ;;Button click resets the map, randomizes it, then displays it.
+             [callback (lambda (button event)
+                         (begin
+                           (Reset)
+                           (randomizeArray)
+                           (DisplayMap)))])
+
 ;;Procedure for printing
 (define (printmap theTile xpos ypos)
     (send (send theMap get-dc) draw-bitmap theTile xpos ypos))
@@ -93,26 +107,26 @@
 
 (define (Reset)
     (set! arrayMap
-       (mutable-array #[ #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]
-                         #[(getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass) (getTexture 'grass)]])))
+       (mutable-array #[ #[(getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3)]
+                         #[(getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2)]
+                         #[(getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1)]
+                         #[(getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass2)]
+                         #[(getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3)]
+                         #[(getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass4)]
+                         #[(getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3)]
+                         #[(getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2)]
+                         #[(getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass1)]
+                         #[(getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2)]
+                         #[(getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3)]
+                         #[(getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass4)]
+                         #[(getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3)]
+                         #[(getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2)]
+                         #[(getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2)]
+                         #[(getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3)]
+                         #[(getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2)]
+                         #[(getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass1)]
+                         #[(getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2)]
+                         #[(getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass3)]])))
 
 
 
@@ -169,7 +183,9 @@
     ;;GENERATE THE RANDOM PATH
     (genPath)
     ;;GENERATE WATER
-    (genLiquid)
+    (genLiquid 'water (send waterIntensity get-value))
+    ;;GENERATE LAVA
+    (genLiquid 'lava (send lavaIntensity get-value))
     ;;GENERATE OTHER THINGS
 ))
 ;;;;;;;;;;;;;;;;;;;;;
@@ -198,8 +214,14 @@
            (set! nexty 1)(set! nexty 0))
           (if(and(> (+ nextx (vector-ref pathVector 0)) -1) ;Checks if the next step is in bounds
                (<(+ nextx (vector-ref pathVector 0)) 20))
-            (if(eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
-                                               (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass))
+            (if(or(eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
+                                                  (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass1))
+                  (eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
+                                                  (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass2))
+                  (eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
+                                                  (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass3))
+                  (eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
+                                                  (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass4)))
               (begin ;If the next step is terrain, Update the current vector position. Set that position in the map array
                      ;to the new path tile. Recrusively call this procedure again if the current position isn't against the right wall. 
                   (vector-set! pathVector 0 (+ nextx (vector-ref pathVector 0)))
@@ -227,13 +249,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;GENERATE LIQUID ALGORITHM: FOR 'liquid TAGGED TILES;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (genLiquid)
+(define (genLiquid type intensity)
     (begin
       ;;Define variables
       (define waterVector (vector 0 0)) ;Keeps track of current position in the map array
-      (define waterLimit ;Number of water tiles to spawn
-        (if (< (send waterIntensity get-value) 15)
-            15 (send waterIntensity get-value)))
+      (define liquidLimit ;Number of water tiles to spawn
+        (if (< intensity 15)
+            15 intensity))
       (define nextx 0) ;Used for next step
       (define nexty 0) ;Used for next step
       (define tilechance 3) ;2/3 chance
@@ -271,7 +293,7 @@
       ;;;;;;;;;;;;;;
       (define (forceTurn)
         (begin
-          (set! waterLimit (- waterLimit 1))
+          (set! liquidLimit (- liquidLimit 1))
           (set! turnchance 0)
           (if (equal? direction 3)
             (set! direction 0)
@@ -288,21 +310,23 @@
       ;;Checks if position is empty;;
       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (define (tileEmpty?)
-        (if(eq?(array-ref arrayMap (vector (+ nextx (vector-ref waterVector 0))
-                                           (+ nexty (vector-ref waterVector 1))))
-               (getTexture 'grass))#t #f))
+        (if(or(eq?(array-ref arrayMap (vector (+ nextx (vector-ref waterVector 0))
+                                              (+ nexty (vector-ref waterVector 1))))(getTexture 'grass1))
+              (eq?(array-ref arrayMap (vector (+ nextx (vector-ref waterVector 0))
+                                              (+ nexty (vector-ref waterVector 1))))(getTexture 'grass2))
+              (eq?(array-ref arrayMap (vector (+ nextx (vector-ref waterVector 0))
+                                              (+ nexty (vector-ref waterVector 1))))(getTexture 'grass3))
+              (eq?(array-ref arrayMap (vector (+ nextx (vector-ref waterVector 0))
+                                              (+ nexty (vector-ref waterVector 1))))(getTexture 'grass4)))#t #f))
       ;;;;;;;;;;;;;;
       ;;Place tile;;
       ;;;;;;;;;;;;;;
       (define (placeTile)
         (begin
-          (set! waterLimit (- waterLimit 1))
+          (set! liquidLimit (- liquidLimit 1))
           (vector-set! waterVector 0 (+ nextx (vector-ref waterVector 0)))
           (vector-set! waterVector 1 (+ nexty (vector-ref waterVector 1)))
-          ;;(if (< (random 100) 75)
-            (array-set! arrayMap waterVector (getTexture 'water))
-           ; (display "Didn't place water"))))
-            ))
+          (array-set! arrayMap waterVector (getTexture type))))
       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       ;;Take a step in a direction;;
       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -320,18 +344,18 @@
                 (Turn))
               (forceTurn))
               (forceTurn))
-          (if (> waterLimit 0)
+          (if (> liquidLimit 0)
             (Step)
-            (display "Generate Water Done \n"))))
+            (display "Generate Liquid Done \n"))))
       ;;;;;;;;;;;;;;
       ;;  DRIVER  ;;
       ;;;;;;;;;;;;;;
-      (if (> (send waterIntensity get-value) 0)
+      (if (> intensity 0)
         (begin
           (startRandom)
           (Step))null)
-      (if(< (random 115) (send waterIntensity get-value))
-         (genLiquid)null)))
+      (if(< (random 115) intensity)
+         (genLiquid type intensity)null)))
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;END GENERATE LIQUID;;
 ;;;;;;;;;;;;;;;;;;;;;;;
