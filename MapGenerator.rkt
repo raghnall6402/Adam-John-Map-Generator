@@ -2,6 +2,7 @@
 (require 2htdp/image)
 (require math/array)
 
+;;HASHTABLE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Hashtable for different terrain types
 (define (makeTable)
   (let ((table (make-hash)))
@@ -27,31 +28,15 @@
   (car (getTerrain terrain)))
 (define (getTexture terrain)
   (cdr (getTerrain terrain)))
+;; END OF HASHTABLE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;Basic objects
-(putTerrain 'default
-            (makeTerrain #f (make-object bitmap% "blank.bmp")))
-(putTerrain 'grass1
-            (makeTerrain #t (make-object bitmap% "grass1.png")))
-(putTerrain 'grass2
-            (makeTerrain #t (make-object bitmap% "grass2.png")))
-(putTerrain 'grass3
-            (makeTerrain #t (make-object bitmap% "grass3.png")))
-(putTerrain 'grass4
-            (makeTerrain #t (make-object bitmap% "grass4.png")))
-(putTerrain 'path
-            (makeTerrain #t (make-object bitmap% "path.png")))
-(putTerrain 'water
-            (makeTerrain #f (make-object bitmap% "water.png")))
-(putTerrain 'ice
-            (makeTerrain #t (make-object bitmap% "ice.png")))
-(putTerrain 'lava
-            (makeTerrain #f (make-object bitmap% "lava.png")))
 
+
+;; WINDOW ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Map class containing overridden canvas on-paint class
 ;;The main window (mainWin)
 (define mainWin (instantiate frame%("Map Generator")))
 
-;;Map class containing overridden canvas on-paint class
 (define theMap%
   (class canvas%
     (override on-paint)
@@ -63,6 +48,16 @@
 (define theMap (new theMap% (parent mainWin)
                   (min-width 800)
                   (min-height 800)))
+
+;;Generate Button
+(new button% [parent mainWin]
+             [label "Generate"]
+             ;;Button click resets the map, randomizes it, then displays it.
+             [callback (lambda (button event)
+                         (begin
+                           (Reset)
+                           (randomizeArray)
+                           (DisplayMap)))])
 
 ;;Path complexity slider
 (define pathComplexity
@@ -88,15 +83,74 @@
                (max-value 100)
                (init-value 50)))
 
-;;Generate Button
-(new button% [parent mainWin]
-             [label "Generate"]
-             ;;Button click resets the map, randomizes it, then displays it.
-             [callback (lambda (button event)
-                         (begin
-                           (Reset)
-                           (randomizeArray)
-                           (DisplayMap)))])
+;; CHECK BOXES FOR FILTERING TERRAIN
+(define (checkBoxes lst)
+  (if (equal? (cdr lst) '())
+      (new check-box%
+           (label (symbol->string (car lst)))
+           (parent mainWin)
+           ;(callback (getTexture (car lst)))
+           (value #f))
+      (begin (new check-box%
+                   (label (symbol->string (car lst)))
+                   (parent mainWin)
+                   ;(callback (getTexture (car lst)))
+                   (value #f))
+             (checkBoxes (cdr lst))
+             )))
+;; END OF WINDOW ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+;; TERRAIN RANDOMIZATION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define terItems 0)
+
+(define terrainList (list))
+
+(define (randomTerrain)
+  (let ((ranTer (random terItems)))
+    (define (randomTerrain-h current list)
+      (if (= current ranTer) (car list)
+          (randomTerrain-h (+ 1 current) (cdr list))))
+  (randomTerrain-h 0 terrainList)))
+
+(define (addToTerrainList item)
+  (begin (set! terrainList (append terrainList item))
+         (set! terItems (+ 1 terItems))))
+;; END OF TERRAIN RANDOMIZATION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; TERRAIN OBJECTS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; also puts it into the terrain list for randomization
+(define (newTerrain tag passable image)
+  (begin (putTerrain tag (makeTerrain passable (make-object bitmap% image)))
+         (addToTerrainList (list tag))))
+
+; liquid constructor does not put it into the list to be selected randomly
+(define (newLiquid tag passable image)
+  (putTerrain tag (makeTerrain passable (make-object bitmap% image))))
+
+;;DEFAULT TERRAIN
+(putTerrain 'default (makeTerrain #f (make-object bitmap% "blank.bmp")))
+(putTerrain 'path (makeTerrain #t (make-object bitmap% "path.png")))
+
+;;NORMAL OBJECTS
+(newTerrain 'grass1 #t "grass1.png")
+(newTerrain 'grass2 #t "grass2.png")
+(newTerrain 'grass3 #t "grass3.png")
+(newTerrain 'grass4 #t "grass4.png")
+;(newTerrain 'ice #t "ice.png")
+; terrains other than the grasses screw up the time to generate the map
+;can add a new terrain by just a simple
+; (newTerrain 'snow #t "snow.png")
+; and have it be generated into the map
+
+
+;;LIQUID OBJECTS ARE SPECIAL FOR NOW
+(newLiquid 'lava #f "lava.png")
+(newLiquid 'water #f "water.png")
+;; EMD OF TERRAIN OBJECTS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 
 ;;Procedure for printing
 (define (printmap theTile xpos ypos)
@@ -105,30 +159,29 @@
 ;;20x20 array for tiles(may be a dynamic array in the future)
 (define arrayMap null)
 
+;; NOT OPTIMIZED?
 (define (Reset)
     (set! arrayMap
-       (mutable-array #[ #[(getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3)]
-                         #[(getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2)]
-                         #[(getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1)]
-                         #[(getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass2)]
-                         #[(getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3)]
-                         #[(getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass4)]
-                         #[(getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3)]
-                         #[(getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2)]
-                         #[(getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass1)]
-                         #[(getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2)]
-                         #[(getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3)]
-                         #[(getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass4)]
-                         #[(getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3)]
-                         #[(getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2)]
-                         #[(getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2)]
-                         #[(getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3)]
-                         #[(getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2)]
-                         #[(getTexture 'grass1) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass1)]
-                         #[(getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass2)]
-                         #[(getTexture 'grass4) (getTexture 'grass3) (getTexture 'grass3) (getTexture 'grass4) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass2) (getTexture 'grass4) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass4) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass2) (getTexture 'grass1) (getTexture 'grass3) (getTexture 'grass1) (getTexture 'grass3)]])))
-
-
+       (mutable-array #[ #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]
+                         #[(getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain)) (getTexture (randomTerrain))]])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;     PROCEDURE FOR DISPLAYING THE MAP       ;;
