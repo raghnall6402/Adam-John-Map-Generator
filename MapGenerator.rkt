@@ -49,29 +49,40 @@
                   (min-width 800)
                   (min-height 800)))
 
+(define sliderPanel
+  (new horizontal-panel%
+       (parent mainWin)
+       (min-height 50)
+       (min-width 50)
+       ;(style '(border))
+       (alignment '(center center))))
+       
 ;;Path complexity slider
 (define pathComplexity
   (new slider% (label "Path complexity")
-               (parent mainWin)
+               (parent sliderPanel)
                (min-value 0)
                (max-value 100)
-               (init-value 50)))
+               (init-value 50)
+               (style '(horizontal vertical-label))))
 
 ;;Water intensity slider
 (define waterIntensity
   (new slider% (label "Water intensity")
-               (parent mainWin)
+               (parent sliderPanel)
                (min-value 0)
                (max-value 100)
-               (init-value 50)))
+               (init-value 50)
+               (style '(horizontal vertical-label))))
 
 ;;Lava intensity slider
 (define lavaIntensity
   (new slider% (label "Lava intensity  ")
-               (parent mainWin)
+               (parent sliderPanel)
                (min-value 0)
                (max-value 100)
-               (init-value 50)))
+               (init-value 50)
+               (style '(horizontal vertical-label))))
 
 ;;Generate Button
 (new button% [parent mainWin]
@@ -83,24 +94,52 @@
                            (randomizeArray)
                            (DisplayMap)))])
 
-;; CHECK BOXES FOR FILTERING TERRAIN
-(define (checkBoxes lst)
-  (if (equal? (cdr lst) '())
-      (new check-box%
-           (label (symbol->string (car lst)))
-           (parent mainWin)
-           ;(callback (boxesChecked))
-           (value #f))
-      (begin (new check-box%
-                   (label (symbol->string (car lst)))
-                   (parent mainWin)
-                   ;(callback (boxesChecked)) ;(getTexture (car lst)))
-                   (value #f))
-             (checkBoxes (cdr lst))
-             )))
+(define activeTerrainList (list))
 
-(define (boxesChecked)
-  (display "boxes checked\n"))
+;; CHECK BOXES FOR FILTERING TERRAIN
+(define checkBoxPanel
+  (new horizontal-panel%
+       (parent mainWin)
+       (min-height 50)
+       (min-width 50)
+       ;(style '(border))
+       (alignment '(center center))))
+
+(define userCheckBoxPanel
+  (new horizontal-panel%
+       (parent mainWin)
+       (min-height 50)
+       (min-width 50)
+       ;(style '(border))
+       (alignment '(center center))))
+
+(define checkBoxList (list))
+
+(define (boxesChecked label)
+  (lambda (a b)
+    (changeActiveList label)))
+
+(define (equal-to-label? label)
+  (lambda (a)
+    (not (equal? label a))))
+
+(define (changeActiveList label)
+  (let ((currentItem (getValueFromList label)))
+    (if (send currentItem get-value)
+        (if (normalTerrain? label)
+            (display 'ok)
+            (begin (set! activeTerrainList (append activeTerrainList (list label)))
+                   (set! activeTerItems (+ 1 activeTerItems))))
+        (begin (set! activeTerrainList (filter (equal-to-label? label) activeTerrainList))
+               (set! activeTerItems (- activeTerItems 1)))
+    )))
+
+(define (getValueFromList label)
+  (define (g-v-f-l-h listOne listTwo)
+    (cond ((equal? '() listOne) #f)
+          ((equal? label (car listOne)) (car listTwo))
+          (else (g-v-f-l-h (cdr listOne) (cdr listTwo)))))
+  (g-v-f-l-h terrainList checkBoxList))
 
 ;; END OF WINDOW ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -108,15 +147,16 @@
 
 ;; TERRAIN RANDOMIZATION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define terItems 0)
+(define activeTerItems 0)
 
 (define terrainList (list))
 
 (define (randomTerrain)
-  (let ((ranTer (random terItems)))
+  (let ((ranTer (random activeTerItems)))
     (define (randomTerrain-h current list)
       (if (= current ranTer) (car list)
           (randomTerrain-h (+ 1 current) (cdr list))))
-  (randomTerrain-h 0 terrainList)))
+  (randomTerrain-h 0 activeTerrainList)))
 
 (define (addToTerrainList item)
   (begin (set! terrainList (append terrainList item))
@@ -125,9 +165,25 @@
 
 ;; TERRAIN OBJECTS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; also puts it into the terrain list for randomization
-(define (newTerrain tag passable image)
-  (begin (putTerrain tag (makeTerrain passable (make-object bitmap% image)))
-         (addToTerrainList (list tag))))
+(define (newTerrain tag passable image default)
+  (begin
+    (putTerrain tag (makeTerrain passable (make-object bitmap% image)))
+    (addToTerrainList (list tag))
+    (if default
+        (set! checkBoxList (append checkBoxList  
+                                   (list (new check-box%
+                                              (label (symbol->string tag))
+                                              (parent checkBoxPanel)
+                                              (callback (boxesChecked tag))
+                                              (value #t)))))
+        (set! checkBoxList (append checkBoxList  
+                                   (list (new check-box%
+                                              (label (symbol->string tag))
+                                              (parent userCheckBoxPanel)
+                                              (callback (boxesChecked tag))
+                                              (value #t))))))
+    (set! activeTerrainList (append activeTerrainList (list tag)))
+    (set! activeTerItems (+ 1 activeTerItems))))
 
 ; liquid constructor does not put it into the list to be selected randomly
 (define (newLiquid tag passable image)
@@ -138,16 +194,16 @@
 (putTerrain 'path (makeTerrain #t (make-object bitmap% "path.png")))
 
 ;;NORMAL OBJECTS
-(newTerrain 'grass1 #t "grass1.png")
-(newTerrain 'grass2 #t "grass2.png")
-(newTerrain 'grass3 #t "grass3.png")
-(newTerrain 'grass4 #t "grass4.png")
-(newTerrain 'ice #t "ice.png")
+(newTerrain 'grass1 #t "grass1.png" #t)
+(newTerrain 'grass2 #t "grass2.png" #t)
+(newTerrain 'grass3 #t "grass3.png" #t)
+(newTerrain 'grass4 #t "grass4.png" #t)
+(newTerrain 'ice #t "ice.png" #t)
 
 ;(checkBoxes terrainList)
 ; terrains other than the grasses screw up the time to generate the map
 ;can add a new terrain by just a simple
-; (newTerrain 'snow #t "snow.png")
+; (newTerrain 'snow #t "snow.png" #f)
 ; and have it be generated into the map
 
 
@@ -252,6 +308,7 @@
     ;;GENERATE LAVA
     (genLiquid 'lava (send lavaIntensity get-value))
     ;;GENERATE OTHER THINGS
+    
 ))
 ;;;;;;;;;;;;;;;;;;;;;
 ;;END RANDOMIZE MAP;;
