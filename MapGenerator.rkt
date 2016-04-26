@@ -89,15 +89,19 @@
       (new check-box%
            (label (symbol->string (car lst)))
            (parent mainWin)
-           ;(callback (getTexture (car lst)))
+           ;(callback (boxesChecked))
            (value #f))
       (begin (new check-box%
                    (label (symbol->string (car lst)))
                    (parent mainWin)
-                   ;(callback (getTexture (car lst)))
+                   ;(callback (boxesChecked)) ;(getTexture (car lst)))
                    (value #f))
              (checkBoxes (cdr lst))
              )))
+
+(define (boxesChecked)
+  (display "boxes checked\n"))
+
 ;; END OF WINDOW ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -138,7 +142,9 @@
 (newTerrain 'grass2 #t "grass2.png")
 (newTerrain 'grass3 #t "grass3.png")
 (newTerrain 'grass4 #t "grass4.png")
-;(newTerrain 'ice #t "ice.png")
+(newTerrain 'ice #t "ice.png")
+
+;(checkBoxes terrainList)
 ; terrains other than the grasses screw up the time to generate the map
 ;can add a new terrain by just a simple
 ; (newTerrain 'snow #t "snow.png")
@@ -148,9 +154,15 @@
 ;;LIQUID OBJECTS ARE SPECIAL FOR NOW
 (newLiquid 'lava #f "lava.png")
 (newLiquid 'water #f "water.png")
+
 ;; EMD OF TERRAIN OBJECTS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
+(define (normalTerrain? item)
+  (define (normal-terrain-helper lst)
+    (cond ((equal? lst '()) #f)
+          ((equal? item (getTexture (car lst))) #t)
+          (else (normal-terrain-helper (cdr lst)))))
+  (normal-terrain-helper terrainList))
 
 ;;Procedure for printing
 (define (printmap theTile xpos ypos)
@@ -285,14 +297,8 @@
                    (< (+ nextx (vector-ref pathVector 0)) 20)
                    (> (+ nexty (vector-ref pathVector 1)) -1)
                    (< (+ nexty (vector-ref pathVector 1)) 20))
-              (if(or(eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
-                                                    (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass1))
-                    (eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
-                                                    (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass2))
-                    (eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
-                                                    (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass3))
-                    (eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
-                                                    (+ nexty (vector-ref pathVector 1)))) (getTexture 'grass4))
+              (if(or(normalTerrain? (array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is empty(contains terrain)
+                                                    (+ nexty (vector-ref pathVector 1)))))
                     (and(eq?(array-ref arrayMap (vector (+ nextx (vector-ref pathVector 0)) ;Checks if the next step is a path(this option is for subpaths)
                                                         (+ nexty (vector-ref pathVector 1)))) (getTexture 'path))
                       (equal? subpath #t))) 
@@ -400,14 +406,9 @@
       ;;Checks if position is empty;;
       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (define (tileEmpty?)
-        (if(or(eq?(array-ref arrayMap (vector (+ nextx (vector-ref waterVector 0))
-                                              (+ nexty (vector-ref waterVector 1))))(getTexture 'grass1))
-              (eq?(array-ref arrayMap (vector (+ nextx (vector-ref waterVector 0))
-                                              (+ nexty (vector-ref waterVector 1))))(getTexture 'grass2))
-              (eq?(array-ref arrayMap (vector (+ nextx (vector-ref waterVector 0))
-                                              (+ nexty (vector-ref waterVector 1))))(getTexture 'grass3))
-              (eq?(array-ref arrayMap (vector (+ nextx (vector-ref waterVector 0))
-                                              (+ nexty (vector-ref waterVector 1))))(getTexture 'grass4)))#t #f))
+        (normalTerrain? (array-ref arrayMap (vector (+ nextx (vector-ref waterVector 0))
+                                              (+ nexty (vector-ref waterVector 1))))))
+          
       ;;;;;;;;;;;;;;
       ;;Place tile;;
       ;;;;;;;;;;;;;;
