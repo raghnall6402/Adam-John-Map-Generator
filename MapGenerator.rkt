@@ -49,16 +49,6 @@
                   (min-width 800)
                   (min-height 800)))
 
-;;Generate Button
-(new button% [parent mainWin]
-             [label "Generate"]
-             ;;Button click resets the map, randomizes it, then displays it.
-             [callback (lambda (button event)
-                         (begin
-                           (Reset)
-                           (randomizeArray)
-                           (DisplayMap)))])
-
 ;;Path complexity slider
 (define pathComplexity
   (new slider% (label "Path complexity")
@@ -82,6 +72,16 @@
                (min-value 0)
                (max-value 100)
                (init-value 50)))
+
+;;Generate Button
+(new button% [parent mainWin]
+             [label "Generate"]
+             ;;Button click resets the map, randomizes it, then displays it.
+             [callback (lambda (button event)
+                         (begin
+                           (Reset)
+                           (randomizeArray)
+                           (DisplayMap)))])
 
 ;; CHECK BOXES FOR FILTERING TERRAIN
 (define (checkBoxes lst)
