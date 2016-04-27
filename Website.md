@@ -101,7 +101,7 @@ My favorite procedure, which is the one I'm most proud of, is the genPath proced
     (if(and(> complexity 0)(equal? subpath #f))
        (genPath complexity #t)(display "no subpaths"))))
 ```
-###John
+####John
 In the end my favorite expression that I made was everything with the checkboxes. Starting out, it seemed very easy, and it would be if I only had to deal with preset terraintypes, i.e. if I only had to deal with grass1 as the only terrain. The challenge came from trying to make it modular enough that an end-user could create a new terrain and have a new random map with their terrain in it.
 
 So it started out simple with only grass, but became complicated as I was trying to make checkboxes without ever naming them and then accessing the values that they held. I came up with the idea to use a list to store and access the checkboxes for each terrain. The actual procedure started extremely complicated, calling a procedure that converted the TerrainList into a list of checkboxes that would then do a bunch of complicated stuff to get working checkboxes. In the end howerver, I figured out how to simplify it to only matter when terrain was made, and to ignore converting the terrainList to a bunch of checkboxes.
