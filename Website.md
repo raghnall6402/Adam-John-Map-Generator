@@ -123,10 +123,42 @@ In the end, it started out seeming simple, was very complicated for a while ther
                                                  (parent grassPanel)
                                                  (callback (boxesChecked tag))
                                                  (value #f))))))
-            . ;about 5 more for different rows
-            .
-            .
-            )))
+          ((equal? type 'snow)
+           (set! checkBoxList (append checkBoxList  
+                                      (list (new check-box%
+                                                 (label (symbol->string tag))
+                                                 (parent snowPanel)
+                                                 (callback (boxesChecked tag))
+                                                 (value #f))))))
+          ((equal? type 'desert)
+           (set! checkBoxList (append checkBoxList  
+                                      (list (new check-box%
+                                                 (label (symbol->string tag))
+                                                 (parent desertPanel)
+                                                 (callback (boxesChecked tag))
+                                                 (value #f))))))
+          ((equal? type 'cave)
+           (set! checkBoxList (append checkBoxList  
+                                      (list (new check-box%
+                                                 (label (symbol->string tag))
+                                                 (parent cavePanel)
+                                                 (callback (boxesChecked tag))
+                                                 (value #f))))))
+          ((equal? type 'farmland)
+           (set! checkBoxList (append checkBoxList  
+                                      (list (new check-box%
+                                                 (label (symbol->string tag))
+                                                 (parent farmlandPanel)
+                                                 (callback (boxesChecked tag))
+                                                 (value #f))))))
+          ((equal? type 'woods)
+           (set! checkBoxList (append checkBoxList  
+                                      (list (new check-box%
+                                                 (label (symbol->string tag))
+                                                 (parent woodsPanel)
+                                                 (callback (boxesChecked tag))
+                                                 (value #f))))))
+    )))
             
             
             
