@@ -130,34 +130,9 @@ In the end, it started out seeming simple, was very complicated for a while ther
                                                  (parent snowPanel)
                                                  (callback (boxesChecked tag))
                                                  (value #f))))))
-          ((equal? type 'desert) ;; desert biome
-           (set! checkBoxList (append checkBoxList  
-                                      (list (new check-box%
-                                                 (label (symbol->string tag))
-                                                 (parent desertPanel)
-                                                 (callback (boxesChecked tag))
-                                                 (value #f))))))
-          ((equal? type 'cave) ;; etc...
-           (set! checkBoxList (append checkBoxList  
-                                      (list (new check-box%
-                                                 (label (symbol->string tag))
-                                                 (parent cavePanel)
-                                                 (callback (boxesChecked tag))
-                                                 (value #f))))))
-          ((equal? type 'farmland)
-           (set! checkBoxList (append checkBoxList  
-                                      (list (new check-box%
-                                                 (label (symbol->string tag))
-                                                 (parent farmlandPanel)
-                                                 (callback (boxesChecked tag))
-                                                 (value #f))))))
-          ((equal? type 'woods)
-           (set! checkBoxList (append checkBoxList  
-                                      (list (new check-box%
-                                                 (label (symbol->string tag))
-                                                 (parent woodsPanel)
-                                                 (callback (boxesChecked tag))
-                                                 (value #f))))))
+          ... ;;one for cave, desert, woods, 
+          ...
+          ...
     )))
             
             
