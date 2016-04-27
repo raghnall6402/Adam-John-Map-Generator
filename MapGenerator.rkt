@@ -81,7 +81,7 @@
                (parent sliderPanel)
                (min-value 0)
                (max-value 100)
-               (init-value 50)
+               (init-value 0)
                (style '(horizontal vertical-label))))
 
 ;;Generate Button
@@ -97,20 +97,46 @@
 (define activeTerrainList (list))
 
 ;; CHECK BOXES FOR FILTERING TERRAIN
-(define checkBoxPanel
+(define grassPanel
   (new horizontal-panel%
        (parent mainWin)
-       (min-height 50)
+       (min-height 25)
        (min-width 50)
-       ;(style '(border))
        (alignment '(center center))))
 
-(define userCheckBoxPanel
+(define snowPanel
   (new horizontal-panel%
        (parent mainWin)
-       (min-height 50)
+       (min-height 25)
        (min-width 50)
-       ;(style '(border))
+       (alignment '(center center))))
+
+(define desertPanel
+  (new horizontal-panel%
+       (parent mainWin)
+       (min-height 25)
+       (min-width 50)
+       (alignment '(center center))))
+
+(define cavePanel
+  (new horizontal-panel%
+       (parent mainWin)
+       (min-height 25)
+       (min-width 50)
+       (alignment '(center center))))
+
+(define farmlandPanel
+  (new horizontal-panel%
+       (parent mainWin)
+       (min-height 25)
+       (min-width 50)
+       (alignment '(center center))))
+
+(define woodsPanel
+  (new horizontal-panel%
+       (parent mainWin)
+       (min-height 25)
+       (min-width 50)
        (alignment '(center center))))
 
 (define checkBoxList (list))
@@ -152,12 +178,13 @@
 (define terrainList (list))
 
 (define (randomTerrain)
-  (let ((ranTer (random activeTerItems)))
-    (define (randomTerrain-h current list)
-      (if (= current ranTer) (car list)
-          (randomTerrain-h (+ 1 current) (cdr list))))
-  (randomTerrain-h 0 activeTerrainList)))
-
+  (if (= 0 activeTerItems) 'grass1
+      (let ((ranTer (random activeTerItems)))
+        (define (randomTerrain-h current list)
+          (if (= current ranTer) (car list)
+              (randomTerrain-h (+ 1 current) (cdr list))))
+        (randomTerrain-h 0 activeTerrainList))))
+  
 (define (addToTerrainList item)
   (begin (set! terrainList (append terrainList item))
          (set! terItems (+ 1 terItems))))
@@ -165,25 +192,52 @@
 
 ;; TERRAIN OBJECTS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; also puts it into the terrain list for randomization
-(define (newTerrain tag passable image default)
+(define (newTerrain tag passable image type)
   (begin
     (putTerrain tag (makeTerrain passable (make-object bitmap% image)))
     (addToTerrainList (list tag))
-    (if default
-        (set! checkBoxList (append checkBoxList  
-                                   (list (new check-box%
-                                              (label (symbol->string tag))
-                                              (parent checkBoxPanel)
-                                              (callback (boxesChecked tag))
-                                              (value #t)))))
-        (set! checkBoxList (append checkBoxList  
-                                   (list (new check-box%
-                                              (label (symbol->string tag))
-                                              (parent userCheckBoxPanel)
-                                              (callback (boxesChecked tag))
-                                              (value #t))))))
-    (set! activeTerrainList (append activeTerrainList (list tag)))
-    (set! activeTerItems (+ 1 activeTerItems))))
+    (cond ((equal? type 'grass)
+           (set! checkBoxList (append checkBoxList  
+                                      (list (new check-box%
+                                                 (label (symbol->string tag))
+                                                 (parent grassPanel)
+                                                 (callback (boxesChecked tag))
+                                                 (value #f))))))
+          ((equal? type 'snow)
+           (set! checkBoxList (append checkBoxList  
+                                      (list (new check-box%
+                                                 (label (symbol->string tag))
+                                                 (parent snowPanel)
+                                                 (callback (boxesChecked tag))
+                                                 (value #f))))))
+          ((equal? type 'desert)
+           (set! checkBoxList (append checkBoxList  
+                                      (list (new check-box%
+                                                 (label (symbol->string tag))
+                                                 (parent desertPanel)
+                                                 (callback (boxesChecked tag))
+                                                 (value #f))))))
+          ((equal? type 'cave)
+           (set! checkBoxList (append checkBoxList  
+                                      (list (new check-box%
+                                                 (label (symbol->string tag))
+                                                 (parent cavePanel)
+                                                 (callback (boxesChecked tag))
+                                                 (value #f))))))
+          ((equal? type 'farmland)
+           (set! checkBoxList (append checkBoxList  
+                                      (list (new check-box%
+                                                 (label (symbol->string tag))
+                                                 (parent farmlandPanel)
+                                                 (callback (boxesChecked tag))
+                                                 (value #f))))))
+          ((equal? type 'woods)
+           (set! checkBoxList (append checkBoxList  
+                                      (list (new check-box%
+                                                 (label (symbol->string tag))
+                                                 (parent woodsPanel)
+                                                 (callback (boxesChecked tag))
+                                                 (value #f)))))))))
 
 ; liquid constructor does not put it into the list to be selected randomly
 (define (newLiquid tag passable image)
@@ -191,14 +245,63 @@
 
 ;;DEFAULT TERRAIN
 (putTerrain 'default (makeTerrain #f (make-object bitmap% "blank.bmp")))
-(putTerrain 'path (makeTerrain #t (make-object bitmap% "path.png")))
+(putTerrain 'path (makeTerrain #t (make-object bitmap% "path-01.png")))
 
 ;;NORMAL OBJECTS
-(newTerrain 'grass1 #t "grass1.png" #t)
-(newTerrain 'grass2 #t "grass2.png" #t)
-(newTerrain 'grass3 #t "grass3.png" #t)
-(newTerrain 'grass4 #t "grass4.png" #t)
-(newTerrain 'ice #t "ice.png" #t)
+(newTerrain 'grass1 #t "grass-01.png" 'grass)
+(newTerrain 'g2 #t "grass-02.png" 'grass)
+(newTerrain 'g3 #t "grass-01.png" 'grass)
+(newTerrain 'g4 #t "grass-02.png" 'grass)
+(newTerrain 'g-bush #t "grass-bush-01.png" 'grass)
+(newTerrain 'g-rock #f "grass-rock-01.png" 'grass)
+(newTerrain 'g-trunk #f "grass-truck-01.png" 'grass)
+(newTerrain 'g-snow1 #t "grass-snow-01.png" 'grass)
+(newTerrain 'g-s2 #t "grass-snow-02.png" 'grass)
+(newTerrain 'g-s3 #t "grass-snow-03.png" 'grass)
+
+(newTerrain 'ice #t "ice-01.png" 'snow)
+(newTerrain 'snow1 #t "snow-01.png" 'snow)
+(newTerrain 's2 #t "snow-01.png" 'snow)
+(newTerrain 's3 #t "snow-01.png" 'snow)
+(newTerrain 's4 #t "snow-01.png" 'snow)
+(newTerrain 's-bush #t "snow-bush-01.png" 'snow)
+(newTerrain 's-grass #t "snow-grass-01.png" 'snow)
+(newTerrain 's-g2 #t "snow-grass-01.png" 'snow)
+
+(newTerrain 'desert1 #t "desert-01.png" 'desert)
+(newTerrain 'd2 #t "desert-02.png" 'desert)
+(newTerrain 'd3 #t "desert-03.png" 'desert)
+(newTerrain 'd4 #t "desert-01.png" 'desert)
+(newTerrain 'd5 #t "desert-02.png" 'desert)
+(newTerrain 'd6 #t "desert-03.png" 'desert)
+(newTerrain 'd-grass #t "desert-grass-01.png" 'desert)
+
+(newTerrain 'cave-f1 #t "cave-floor-01.png" 'cave)
+(newTerrain 'cave-f2 #t "cave-floor-02.png" 'cave)
+(newTerrain 'cave-g1 #t "cave-ground-01.png" 'cave)
+(newTerrain 'cave-g2 #t "cave-ground-02.png" 'cave)
+(newTerrain 'cave-g3 #t "cave-ground-03.png" 'cave)
+(newTerrain 'cave-u1 #t "cave-upper-01.png" 'cave)
+(newTerrain 'cave-u2 #t "cave-upper-02.png" 'cave)
+(newTerrain 'cave-u-rock #f "cave-upper-rock-01.png" 'cave)
+
+(newTerrain 'farmland #t "farmland-01.png" 'farmland)
+(newTerrain 'fl2 #t "farmland-01.png" 'farmland)
+(newTerrain 'fl-wheat #t "farmland-wheat-01.png" 'farmland)
+(newTerrain 'fl-grass #t "farmland-grass-01.png" 'farmland)
+(newTerrain 'fl-g2 #t "farmland-grass-01.png" 'farmland)
+
+(newTerrain 'woods-d1 #t "woods-dirt-01.png" 'woods)
+(newTerrain 'w-d2 #t "woods-dirt-02.png" 'woods)
+(newTerrain 'w-grasspatch #t "woods-grasspatch-01.png" 'woods)
+(newTerrain 'w-g1 #t "woods-grass-01.png" 'woods)
+(newTerrain 'w-g2 #t "woods-grass-02.png" 'woods)
+(newTerrain 'w-g3 #t "woods-grass-03.png" 'woods)
+(newTerrain 'w-tall #t "woods-grass-tall-01.png" 'woods)
+(newTerrain 'w-tree #f "woods-tree-01.png" 'woods)
+(newTerrain 'w-t2 #f "woods-tree-01.png" 'woods)
+(newTerrain 'w-t3 #f "woods-tree-01.png" 'woods)
+
 
 ;(checkBoxes terrainList)
 ; terrains other than the grasses screw up the time to generate the map
@@ -208,8 +311,8 @@
 
 
 ;;LIQUID OBJECTS ARE SPECIAL FOR NOW
-(newLiquid 'lava #f "lava.png")
-(newLiquid 'water #f "water.png")
+(newLiquid 'lava #f "lava-02.png")
+(newLiquid 'water #f "water-01.png")
 
 ;; EMD OF TERRAIN OBJECTS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
