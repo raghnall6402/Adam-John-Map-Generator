@@ -116,28 +116,28 @@ In the end, it started out seeming simple, was very complicated for a while ther
   (begin
     (putTerrain tag (makeTerrain passable (make-object bitmap% image)))
     (addToTerrainList (list tag))
-    (cond ((equal? type 'grass)
+    (cond ((equal? type 'grass) ;; different conditional statements to seperate terrain into rows
            (set! checkBoxList (append checkBoxList  
                                       (list (new check-box%
                                                  (label (symbol->string tag))
                                                  (parent grassPanel)
                                                  (callback (boxesChecked tag))
                                                  (value #f))))))
-          ((equal? type 'snow)
+          ((equal? type 'snow) ;; if it's part of the snow biome
            (set! checkBoxList (append checkBoxList  
                                       (list (new check-box%
                                                  (label (symbol->string tag))
                                                  (parent snowPanel)
                                                  (callback (boxesChecked tag))
                                                  (value #f))))))
-          ((equal? type 'desert)
+          ((equal? type 'desert) ;; desert biome
            (set! checkBoxList (append checkBoxList  
                                       (list (new check-box%
                                                  (label (symbol->string tag))
                                                  (parent desertPanel)
                                                  (callback (boxesChecked tag))
                                                  (value #f))))))
-          ((equal? type 'cave)
+          ((equal? type 'cave) ;; etc...
            (set! checkBoxList (append checkBoxList  
                                       (list (new check-box%
                                                  (label (symbol->string tag))
