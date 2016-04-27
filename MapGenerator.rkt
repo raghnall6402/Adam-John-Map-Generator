@@ -311,7 +311,7 @@
 
 
 ;;LIQUID OBJECTS ARE SPECIAL FOR NOW
-(newLiquid 'lava #f "lava-02.png")
+(newLiquid 'lava #f "lava.png")
 (newLiquid 'water #f "water-01.png")
 
 ;; EMD OF TERRAIN OBJECTS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
