@@ -143,6 +143,8 @@ In the end, it started out seeming simple, was very complicated for a while ther
                (set! activeTerItems (- activeTerItems 1))) ;;if it's not active, remove it fromt the active terrai list with filter
     )))
 
+
+
 ;; SIMPLE CHECKBOX FINDING ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (getValueFromList label)
   (define (g-v-f-l-h listOne listTwo)
